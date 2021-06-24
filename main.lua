@@ -22,6 +22,18 @@ function love.keyreleased(key)
 	end
 end
 
+function love.mousepressed(x, y, button, isTouch)
+	E.message(nil, "head", "mousepressed", x, y)
+end
+
+function love.mousereleased(x, y, button, isTouch)
+	E.message(nil, "head", "mousereleased", x, y)
+end
+
+function love.mousemoved(x, y, dx, dy, isTouch)
+	E.message(nil, "head", "mousemoved", x, y)
+end
+
 love.draw = VP.draw
 
 local spritesheet = require("spritesheet")

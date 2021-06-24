@@ -1,3 +1,5 @@
+local tunpack = unpack -- table.unpack
+
 local E = {
 	sortfn = nil,
 	_systems = {},
@@ -73,7 +75,7 @@ function E.entity(data)
 				end
 				for _, i in ipairs(target) do
 					if i[name] then
-						i[name](i, e, table.unpack(mdata))
+						i[name](i, e, tunpack(mdata))
 						c = c + 1
 					end
 				end
@@ -85,6 +87,17 @@ function E.entity(data)
 	table.insert(E._entities2add, e)
 
 	return e
+end
+
+function E.map(name, cbfn)
+	local ents = E._entities
+	if name then
+		ents = E._namedEntities[name]
+	end
+
+	for _, e in ipairs(ents) do
+		cbfn(e)
+	end
 end
 
 function E.message(e, target, name, ...)
@@ -194,6 +207,8 @@ E.M = E.message -- entity, target, name, ...
 E.T = E.tween   -- entity, duration, progressFn, doneFn
 E.U = E.update  -- ...
 
+-- E.map -- name, fn
 -- E.S.system -- system, entity, ...
+-- E.M.[cbName] -- entity, name, ...
 
 return E

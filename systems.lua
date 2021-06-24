@@ -19,6 +19,55 @@ E.S("spr", function (sys, e)
 end)
 
 E.S("head", function (sys, e, dt)
+	if e.tgt then
+		local s = e.tgt.s
+		if s < 8 then
+			s = s + 1
+		end
+		e.tgt.s = s
+		s = math.max(1,
+			math.min(s,
+				math.max(
+					math.abs(e.tgt.x - e.x),
+					math.abs(e.tgt.y - e.y)
+				)
+			)
+		)
+		local dx = math.floor(e.tgt.x) - math.floor(e.x)
+		local dy = math.floor(e.tgt.y) - math.floor(e.y)
+		local d = dt * s * 8
+		if dx < 0 then
+			e.x = e.x - d
+		elseif dx > 0 then
+			e.x = e.x + d
+		end
+		if dy < 0 then
+			e.y = e.y - d
+		elseif dy > 0 then
+			e.y = e.y + d
+		end
+		if dx == 0 and dy < 0 then
+			e.r = 1
+		elseif dx > 0 and dy < 0 then
+			e.r = 2
+		elseif dx > 0 and dy == 0 then
+			e.r = 3
+		elseif dx > 0 and dy > 0 then
+			e.r = 4
+		elseif dx == 0 and dy > 0 then
+			e.r = 5
+		elseif dx < 0 and dy > 0 then
+			e.r = 6
+		elseif dx < 0 and dy == 0 then
+			e.r = 7
+		elseif dx < 0 and dy < 0 then
+			e.r = 8
+		end
+	end
+
+	E.map("tail", function(e)
+
+	end)
 end)
 
 E.S("tail", function (sys, e, dt)
