@@ -73,6 +73,9 @@ function E.entity(data)
 				if not target then
 					target = E._namedEntities[data.name]
 				end
+				if type(target) == "table" and #target == 0 then
+					target = {target}
+				end
 				for _, i in ipairs(target) do
 					if i[name] then
 						i[name](i, e, tunpack(mdata))
@@ -103,8 +106,10 @@ end
 function E.message(e, target, name, ...)
 	local targetName = target
 	local goal = nil
-	if type(target) ~= "string" then
-		targetName = target.name
+	if type(target) == "table" then
+		if target.name then
+			targetName = target.name
+		end
 		goal = target
 	end
 	local co = E._messageCoroutines[targetName]
