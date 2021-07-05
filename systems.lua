@@ -1,4 +1,4 @@
-E.S("spr", function (sys, e)
+Age.S("spr", function (sys, e)
 	local img = e.spr.image or error("Unavailable Image", 2)
 	local x, y = math.floor(e.x or 0), math.floor(e.y or 0)
 	local w, h = e.w or 16, e.h or 16
@@ -32,11 +32,11 @@ local function pushPosition(e)
 	tp[16][1] = e.x
 	tp[16][2] = e.y
 	if e.tailElem then
-		E.message(e, e.tailElem, "movedPosition", tp[1][1], tp[1][2])
+		Age.message(e, e.tailElem, "movedPosition", tp[1][1], tp[1][2])
 	end
 end
 
-E.S("head", function (sys, e, dt)
+Age.S("head", function (sys, e, dt)
 	if e.tgt then
 		pushPosition(e)
 		local s = e.tgt.s
@@ -84,10 +84,10 @@ E.S("head", function (sys, e, dt)
 		end
 	end
 
-	E.map("tail", function(o)
+	Age.map("tail", function(o)
 		local dx, dy = e.x - o.x, e.y - o.y
 		if math.sqrt(dx*dx + dy*dy) < 16 then
-			E.message(e, o, "headTouch")
+			Age.message(e, o, "headTouch")
 		end
 	end)
 end)
@@ -107,7 +107,7 @@ local function autoMove(e, dt)
 	end
 end
 
-E.S("tail", function (sys, e, dt)
+Age.S("tail", function (sys, e, dt)
 	pushPosition(e)
 
 	if not e.headElem then

@@ -1,4 +1,4 @@
-E = require("age")
+Age = require("age")
 VP = require("viewport")
 lg = love.graphics
 lg.setDefaultFilter("nearest", "nearest")
@@ -7,8 +7,8 @@ VP.setup()
 
 function love.update(dt)
 	lg.setCanvas(VP.canvas)
-	--lg.clear(1/3, 2/3, 1)
-	E.update(dt)
+	lg.clear(clearColor or nil)
+	Age.update(dt)
 	lg.setCanvas()
 end
 
@@ -23,15 +23,15 @@ function love.keyreleased(key)
 end
 
 function love.mousepressed(x, y, button, isTouch)
-	E.message(nil, "head", "mousepressed", x, y)
+	Age.message(nil, "head", "mousepressed", x, y)
 end
 
 function love.mousereleased(x, y, button, isTouch)
-	E.message(nil, "head", "mousereleased", x, y)
+	Age.message(nil, "head", "mousereleased", x, y)
 end
 
 function love.mousemoved(x, y, dx, dy, isTouch)
-	E.message(nil, "head", "mousemoved", x, y)
+	Age.message(nil, "head", "mousemoved", x, y)
 end
 
 love.draw = VP.draw

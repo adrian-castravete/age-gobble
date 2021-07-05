@@ -1,17 +1,18 @@
-require("systems")
-local T = require("things")
+require("things")
+
 local function spawn(t)
-	local e = E.E(t)
-	e.x = math.random() * 320
-	e.y = math.random() * 240
-	e.r = 1 + math.floor(math.random() * 8)
+	local e = Age.entity(t, {
+		x = math.random() * 320,
+		y = math.random() * 240,
+		r = 1 + math.floor(math.random() * 8),
+	})
 end
 
 function demo()
 	for i=1, 15 do
-		spawn(T.Tail)
+		spawn("tail")
 	end
-	spawn(T.Head)
+	spawn("head")
 end
 
 return {
