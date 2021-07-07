@@ -135,11 +135,6 @@ function Head:update(dt)
 
 	e:message("tail", "headMoved", e)
 
-	--[[
-	for _, p in ipairs(self.tailPositions) do
-		lg.rectangle("line", p[1] - 2, p[2] - 2, 5, 5)
-	end
-	--]]
 	self:draw()
 end
 
@@ -149,7 +144,6 @@ function Head:mousepressed(x, y)
 		y = (y - VP.offsetY) / VP.scale,
 		s = 0,
 	} end
-
 function Head:mousereleased(x, y)
 	self.tgt = nil
 end
@@ -205,11 +199,6 @@ function Tail:update(dt)
 		self:autoMove(dt)
 	end
 
-	--[[
-	for _, p in ipairs(self.tailPositions) do
-		lg.rectangle("line", p[1] - 2, p[2] - 2, 5, 5)
-	end
-	--]]
 	self:draw()
 end
 
