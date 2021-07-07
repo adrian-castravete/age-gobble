@@ -23,15 +23,15 @@ function love.keyreleased(key)
 end
 
 function love.mousepressed(x, y, button, isTouch)
-	Age.message(nil, "head", "mousepressed", x, y)
+	Age.message("head", "mousepressed", x, y)
 end
 
 function love.mousereleased(x, y, button, isTouch)
-	Age.message(nil, "head", "mousereleased", x, y)
+	Age.message("head", "mousereleased", x, y)
 end
 
 function love.mousemoved(x, y, dx, dy, isTouch)
-	Age.message(nil, "head", "mousemoved", x, y)
+	Age.message("head", "mousemoved", x, y)
 end
 
 love.draw = VP.draw

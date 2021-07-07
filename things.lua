@@ -63,8 +63,20 @@ function Piece:pushPosition()
 	tp[16][1] = self.x
 	tp[16][2] = self.y
 	if self.tailElem then
-		Age.message(self, self.tailElem, "movedPosition", tp[1][1], tp[1][2])
+		self:message(self.tailElem, "movedPosition", tp[1][1], tp[1][2])
 	end
+end
+
+function Piece:tailFree(tail)
+	if self.tailElem == tail then return end
+
+	if self.tailElem then
+		self:message(self.tailElem, "tailFree", tail)
+		return
+	end
+
+	self.tailElem = tail
+	self:message(tail, "headAttach", self)
 end
 
 
@@ -77,7 +89,7 @@ function Head:update(dt)
 	if e.tgt then
 		self:pushPosition()
 		local s = e.tgt.s
-		if s < 8 then
+		if s < 5 then
 			s = s + 1
 		end
 		e.tgt.s = s
@@ -121,31 +133,28 @@ function Head:update(dt)
 		end
 	end
 
-	Age.map("tail", function(o)
-		local dx, dy = e.x - o.x, e.y - o.y
-		if math.sqrt(dx*dx + dy*dy) < 16 then
-			Age.message(e, o, "headTouch", o)
-		end
-	end)
+	e:message("tail", "headMoved", e)
 
+	--[[
 	for _, p in ipairs(self.tailPositions) do
 		lg.rectangle("line", p[1] - 2, p[2] - 2, 5, 5)
 	end
+	--]]
 	self:draw()
 end
 
-function Head:mousepressed(s, x, y)
+function Head:mousepressed(x, y)
 	self.tgt = {
 		x = (x - VP.offsetX) / VP.scale,
 		y = (y - VP.offsetY) / VP.scale,
 		s = 0,
 	} end
 
-function Head:mousereleased(s, x, y)
+function Head:mousereleased(x, y)
 	self.tgt = nil
 end
 
-function Head:mousemoved(s, x, y)
+function Head:mousemoved(x, y)
 	if self.tgt then
 		self.tgt.x = (x - VP.offsetX) / VP.scale
 		self.tgt.y = (y - VP.offsetY) / VP.scale
@@ -160,16 +169,17 @@ function Tail:init()
 	self.qs = self.spr.quads.defaultTail
 end
 
-function Tail:headTouch(src, elem)
-	if self.tailElem then
-		Age.message(self, self.tailElem, "headTouch", elem)
-		return
-	end
+function Tail:headMoved(head)
+	if self.headElem then return end
 
-	self.tailElem = elem
+	local dx, dy = head.x - self.x, head.y - self.y
+	if dx*dx + dy*dy >= 256 then return end
+
+	self:message(head, "tailFree", self)
 end
 
-function Tail:movedPosition(s, x, y)
+function Tail:movedPosition(x, y)
+	self:pushPosition()
 	self.x = x
 	self.y = y
 end
@@ -191,16 +201,20 @@ function Tail:autoMove(dt)
 end
 
 function Tail:update(dt)
-	self:pushPosition()
-
-	if not self.tailElem then
+	if not self.headElem then
 		self:autoMove(dt)
 	end
 
+	--[[
 	for _, p in ipairs(self.tailPositions) do
 		lg.rectangle("line", p[1] - 2, p[2] - 2, 5, 5)
 	end
+	--]]
 	self:draw()
+end
+
+function Tail:headAttach(head)
+	self.headElem = head
 end
 
 Age.template("tail", Tail)

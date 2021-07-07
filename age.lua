@@ -28,28 +28,67 @@ end
 
 local Age = {
 	layers = {"default"},
+	callLimit = 1024,
 	_templates = {},
 	_entities = {},
 	_ents2add = {},
 	_lastId = 0,
 	_walkFlip = false,
 	_coroutines = {},
+	_callBackLog = {},
 }
 Age.__index = Age
+
+local function _resumeTarget(targetName, target, message, args)
+	local co = Age._coroutines[targetName]
+	if not co then
+		error("Unknown target '" .. targetName .. "'", 3)
+	end
+	if false and target then
+		print(
+			message,
+			targetName .. "(" .. target.id .. ")"
+		)
+	end
+	local ok, err = coroutine.resume(co, target, message, args)
+	if not ok then
+		if err == "cannot resume running coroutine" then
+			table.insert(Age._callBackLog, {targetName, target, message, args})
+			return
+		end
+		error(err, 3)
+	end
+end
+
+function Age.message(target, message, ...)
+	local args = {...}
+	if type(target) == "string" then
+		return _resumeTarget(target, nil, message, args)
+	end
+	local targetName = target.template
+	if targetName then
+		return _resumeTarget(targetName, target, message, args)
+	end
+	local res = {}
+	for _, e in ipairs(target) do
+		table.insert(res, _resumeTarget(e.template, e, message, args))
+	end
+	return res
+end
 
 function Age.template(name, template)
 	if not template.__index then
 		template.__index = template
 	end
 	template.templateName = name
-	local co = coroutine.create(function (src, target, message, args)
+	local co = coroutine.create(function (target, message, args)
 		while true do
 			Age.map(name, function (e)
 				if not target or e.id == target.id then
-					e[message](e, src, tunpack(args))
+					e[message](e, tunpack(args))
 				end
 			end)
-			src, target, message, args = coroutine.yield()
+			target, message, args = coroutine.yield()
 		end
 	end)
 	Age._coroutines[name] = co
@@ -76,6 +115,9 @@ function Age.entity(name, start, ...)
 	if not e.layer then
 		e.layer = "default"
 	end
+	e.message = function(self, ...)
+		Age.message(...)
+	end
 
 	table.insert(Age._ents2add, e)
 
@@ -92,6 +134,16 @@ function Age.update(...)
 		table.insert(ents, e)
 	end
 	Age._ents2add = {}
+
+	local currentCalls = Age._callBackLog
+	Age._callBackLog = {}
+	for i=1, #currentCalls do
+		if i > Age.callLimit then
+			print("Warning! Reached " .. Age.callLimit .. " calls. Discarding the rest...")
+			break
+		end
+		_resumeTarget(tunpack(currentCalls[i]))
+	end
 
 	for _, layer in ipairs(Age.layers) do
 		local ents = Age._entities[layer]
@@ -140,40 +192,6 @@ function Age.map(templateName, callback, targetLayer)
 			end
 		end
 	end
-end
-
-local function _resumeTarget(targetName, src, target, message, args)
-	local co = Age._coroutines[targetName]
-	if not co then
-		error("Unknown target '" .. targetName .. "'", 3)
-	end
-	local ok, err = coroutine.resume(co, src, target, message, args)
-	if not ok then
-		if err ~= "cannot resume running coroutine" then
-			error(err, 3)
-		end
-		if not _errRunningCos then
-			_errRunningCos = 0
-		end
-		_errRunningCos = _errRunningCos + 1
-		print("Running coroutine calls rejected: " .. _errRunningCos)
-	end
-end
-
-function Age.message(src, target, message, ...)
-	local args = {...}
-	if type(target) == "string" then
-		return _resumeTarget(target, src, nil, message, args)
-	end
-	local targetName = target.template
-	if targetName then
-		return _resumeTarget(targetName, src, target, message, args)
-	end
-	local res = {}
-	for _, e in ipairs(target) do
-		table.insert(res, _resumeTarget(e.template, src, e, message, args))
-	end
-	return res
 end
 
 return Age
