@@ -79,6 +79,30 @@ function Piece:tailFree(tail)
 	self:message(tail, "headAttach", self)
 end
 
+function Piece:switchDirection(dx, dy)
+	local r = nil
+	if dx == 0 and dy < 0 then
+		r = 1
+	elseif dx > 0 and dy < 0 then
+		r = 2
+	elseif dx > 0 and dy == 0 then
+		r = 3
+	elseif dx > 0 and dy > 0 then
+		r = 4
+	elseif dx == 0 and dy > 0 then
+		r = 5
+	elseif dx < 0 and dy > 0 then
+		r = 6
+	elseif dx < 0 and dy == 0 then
+		r = 7
+	elseif dx < 0 and dy < 0 then
+		r = 8
+	end
+	if r then
+		self.r = r
+	end
+end
+
 
 
 local Head = Age.clone(Piece)
@@ -89,7 +113,7 @@ function Head:update(dt)
 	if e.tgt then
 		self:pushPosition()
 		local s = e.tgt.s
-		if s < 5 then
+		if s < 8 then
 			s = s + 1
 		end
 		e.tgt.s = s
@@ -104,6 +128,9 @@ function Head:update(dt)
 		local dx = math.floor(e.tgt.x) - math.floor(e.x)
 		local dy = math.floor(e.tgt.y) - math.floor(e.y)
 		local d = dt * s * 8
+		if dx ~= 0 and dy ~= 0 then
+			d = d * 0.7071
+		end
 		if dx < 0 then
 			e.x = e.x - d
 		elseif dx > 0 then
@@ -114,23 +141,7 @@ function Head:update(dt)
 		elseif dy > 0 then
 			e.y = e.y + d
 		end
-		if dx == 0 and dy < 0 then
-			e.r = 1
-		elseif dx > 0 and dy < 0 then
-			e.r = 2
-		elseif dx > 0 and dy == 0 then
-			e.r = 3
-		elseif dx > 0 and dy > 0 then
-			e.r = 4
-		elseif dx == 0 and dy > 0 then
-			e.r = 5
-		elseif dx < 0 and dy > 0 then
-			e.r = 6
-		elseif dx < 0 and dy == 0 then
-			e.r = 7
-		elseif dx < 0 and dy < 0 then
-			e.r = 8
-		end
+		self:switchDirection(dx, dy)
 	end
 
 	e:message("tail", "headMoved", e)
@@ -174,6 +185,7 @@ end
 
 function Tail:movedPosition(x, y)
 	self:pushPosition()
+	self:switchDirection(x - self.x, y - self.y)
 	self.x = x
 	self.y = y
 end
